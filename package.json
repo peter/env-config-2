@@ -1,0 +1,26 @@
+{
+  "name": "env-config-example",
+  "version": "1.0.0",
+  "description": "Simple app to illustrate how to handle environment variables and config in Node.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=development node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/versioned/node-env-config-example.git"
+  },
+  "keywords": [
+    "config",
+    "env"
+  ],
+  "author": "Peter Marklund",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/versioned/node-env-config-example/issues"
+  },
+  "homepage": "https://github.com/versioned/node-env-config-example#readme",
+  "dependencies": {
+    "dotenv": "6.1.0"
+  }
+}
