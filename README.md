@@ -58,6 +58,17 @@ const server = http.createServer(handler).listen(config.PORT)
 console.log('Server started with config:', config)
 ```
 
+```
+# File .env
+RATE_LIMIT=1000
+```
+
+Start the app:
+
+```
+RATE_LIMIT=5000 node index.js
+```
+
 ## Resources
 
 * [The Twelve Factor App - Config](https://12factor.net/config)
