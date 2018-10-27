@@ -96,15 +96,6 @@ Server started with config: { NODE_ENV: 'development',
   API_BASE_URL: 'http://localhost:3000/v1' }
 ```
 
-You can also provide environment variables in a `.env` file like this:
-
-```
-RATE_LIMIT=5000
-ALGOLIASEARCH_APPLICATION_ID=foobar
-ALGOLIASEARCH_API_KEY=foobar
-ALGOLIASEARCH_API_KEY_SEARCH=foobar
-```
-
 ## Resources
 
 * [The Twelve Factor App - Config](https://12factor.net/config)
