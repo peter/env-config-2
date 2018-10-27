@@ -3,8 +3,14 @@ const fs = require('fs')
 const dotenv = require('dotenv')
 const {typeCast} = require('./types')
 
-function getDotEnvConfig () {
-  const path = '.env'
+const dotEnvPath = '.env'
+
+function optionsWithDefaults (options, defaultOptions) {
+  return Object.assign({}, options, defaultOptions)
+}
+
+function getDotEnvConfig (options = {}) {
+  const path = options.dotEnvPath || dotEnvPath
   if (!fs.existsSync(path)) return
   return dotenv.parse(fs.readFileSync(path))
 }
@@ -17,16 +23,19 @@ function isMissing (key, value) {
   return value === undefined
 }
 
+function getConfigCandidates (defaultConfig, options = {}) {
+  return [process.env, getDotEnvConfig(options), defaultConfig]
+}
+
 function generateConfig (defaultConfig, options = {}) {
-  const configCandidates = [process.env, getDotEnvConfig(), defaultConfig]
+  options = optionsWithDefaults(options, {dotEnvPath, isMissing, typeCast, getConfigCandidates})
   const missingEnvVars = []
-  const _isMissing = options.isMissing || isMissing
-  const _typeCast = options.typeCast || typeCast
+  const configCandidates = options.getConfigCandidates(defaultConfig, options)
   const config = Object.keys(defaultConfig).reduce((acc, key) => {
     const value = getValue(configCandidates, key)
     const defaultValue = defaultConfig[key]
-    if (_isMissing(key, value)) missingEnvVars.push(key)
-    acc[key] = _typeCast(value, defaultValue)
+    if (options.isMissing(key, value)) missingEnvVars.push(key)
+    acc[key] = options.typeCast(value, defaultValue)
     return acc
   }, {})
   assert(missingEnvVars.length === 0, `Config is missing the following environment variables: ${missingEnvVars.join(', ')}`)
@@ -34,5 +43,8 @@ function generateConfig (defaultConfig, options = {}) {
 }
 
 module.exports = {
+  getDotEnvConfig,
+  isMissing,
+  getConfigCandidates,
   generateConfig
 }

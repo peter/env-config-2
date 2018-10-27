@@ -39,5 +39,11 @@ function typeCast (value, defaultValue) {
 }
 
 module.exports = {
+  isBoolean,
+  toBoolean,
+  isInteger,
+  toInteger,
+  isFloat,
+  toFloat,
   typeCast
 }

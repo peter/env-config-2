@@ -1,0 +1,10 @@
+{
+    "extends": "standard",
+    "globals": {
+      "test": true,
+      "expect": true
+    },
+    "rules": {
+      "object-curly-spacing": ["error", "never"]
+    }
+}
