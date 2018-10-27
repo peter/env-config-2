@@ -26,12 +26,12 @@ function toFloat (value) {
   return parseFloat(value)
 }
 
-function typeCast (value, defaultValue) {
-  if (isBoolean(defaultValue)) {
+function typeCast (value, exampleValue) {
+  if (isBoolean(exampleValue)) {
     return toBoolean(value)
-  } else if (isInteger(defaultValue)) {
+  } else if (isInteger(exampleValue)) {
     return toInteger(value)
-  } else if (isFloat(defaultValue)) {
+  } else if (isFloat(exampleValue)) {
     return toFloat(value)
   } else {
     return value

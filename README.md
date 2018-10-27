@@ -35,13 +35,10 @@ const defaultConfig ={
   JWT_SECRET: (NODE_ENV === 'development' ? 'foobar' : null),
   JWT_EXPIRY: (3600 * 24 * 30),
   RATE_LIMIT: (NODE_ENV === 'production' ? 5 : 0),
-  ALGOLIASEARCH_APPLICATION_ID: undefined,
-  ALGOLIASEARCH_API_KEY: undefined,
-  ALGOLIASEARCH_API_KEY_SEARCH: undefined,
   API_BASE_URL: (NODE_ENV === 'development' ? 'http://localhost:3000/v1' : 'https://api.versioned.io/v1')
 }
-
-module.exports = envConfig.generateConfig(defaultConfig)
+const requiredKeys = ['ALGOLIASEARCH_APPLICATION_ID', 'ALGOLIASEARCH_API_KEY', 'ALGOLIASEARCH_API_KEY_SEARCH']
+module.exports = envConfig.generateConfig({defaultConfig, requiredKeys})
 ```
 
 ```javascript
@@ -63,7 +60,7 @@ console.log('Server started with config:', config)
 RATE_LIMIT=1000
 ```
 
-Start the app with missing (undefined) env variables:
+Start the app with missing env variables:
 
 ```
 RATE_LIMIT=5000 node index.js
@@ -72,7 +69,7 @@ RATE_LIMIT=5000 node index.js
 Output:
 
 ```
-AssertionError [ERR_ASSERTION]: Config is missing the following environment variables: ALGOLIASEARCH_APPLICATION_ID, ALGOLIASEARCH_API_KEY, ALGOLIASEARCH_API_KEY_SEARCH
+AssertionError [ERR_ASSERTION]: Config is missing the following keys that can be set as environment variables: ALGOLIASEARCH_APPLICATION_ID, ALGOLIASEARCH_API_KEY, ALGOLIASEARCH_API_KEY_SEARCH
 ```
 
 Start the app with all needed env variables:
@@ -84,15 +81,15 @@ RATE_LIMIT=5000 ALGOLIASEARCH_APPLICATION_ID=foobar ALGOLIASEARCH_API_KEY=foobar
 Output:
 
 ```
-Server started with config: { NODE_ENV: 'development',
+Server started with config: { ALGOLIASEARCH_APPLICATION_ID: 'foobar',
+  ALGOLIASEARCH_API_KEY: 'foobar',
+  ALGOLIASEARCH_API_KEY_SEARCH: 'foobar',
+  NODE_ENV: 'development',
   PORT: 3000,
   MONGODB_URL: 'mongodb://localhost:27017/node_env_config_example_development',
   JWT_SECRET: 'foobar',
   JWT_EXPIRY: 2592000,
   RATE_LIMIT: 5000,
-  ALGOLIASEARCH_APPLICATION_ID: 'foobar',
-  ALGOLIASEARCH_API_KEY: 'foobar',
-  ALGOLIASEARCH_API_KEY_SEARCH: 'foobar',
   API_BASE_URL: 'http://localhost:3000/v1' }
 ```
 

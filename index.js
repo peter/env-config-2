@@ -6,7 +6,7 @@ const {typeCast} = require('./types')
 const dotEnvPath = '.env'
 
 function optionsWithDefaults (options, defaultOptions) {
-  return Object.assign({}, options, defaultOptions)
+  return Object.assign({}, defaultOptions, options)
 }
 
 function getDotEnvConfig (options = {}) {
@@ -20,31 +20,29 @@ function getValue (configCandidates, key) {
 }
 
 function isMissing (key, value) {
-  return value === undefined
+  return value == null
 }
 
-function getConfigCandidates (defaultConfig, options = {}) {
-  return [process.env, getDotEnvConfig(options), defaultConfig]
-}
-
-function generateConfig (defaultConfig, options = {}) {
-  options = optionsWithDefaults(options, {dotEnvPath, isMissing, typeCast, getConfigCandidates})
-  const missingEnvVars = []
-  const configCandidates = options.getConfigCandidates(defaultConfig, options)
-  const config = Object.keys(defaultConfig).reduce((acc, key) => {
+function generateConfig (options = {}) {
+  const defaultOptions = {dotEnvPath, isMissing, typeCast, requiredKeys: [], defaultConfig: {}, exampleValues: {}}
+  options = optionsWithDefaults(options, defaultOptions)
+  const {defaultConfig} = options
+  const missingKeys = []
+  const configCandidates = [process.env, getDotEnvConfig(options), defaultConfig]
+  const configKeys = options.requiredKeys.concat(Object.keys(defaultConfig))
+  const config = configKeys.reduce((acc, key) => {
     const value = getValue(configCandidates, key)
-    const defaultValue = defaultConfig[key]
-    if (options.isMissing(key, value)) missingEnvVars.push(key)
-    acc[key] = options.typeCast(value, defaultValue)
+    const exampleValue = options.exampleValues[key] || defaultConfig[key]
+    if (options.requiredKeys.includes(key) && options.isMissing(key, value)) missingKeys.push(key)
+    acc[key] = options.typeCast(value, exampleValue)
     return acc
   }, {})
-  assert(missingEnvVars.length === 0, `Config is missing the following environment variables: ${missingEnvVars.join(', ')}`)
+  assert(missingKeys.length === 0, `Config is missing the following keys that can be set as environment variables: ${missingKeys.join(', ')}`)
   return config
 }
 
 module.exports = {
   getDotEnvConfig,
   isMissing,
-  getConfigCandidates,
   generateConfig
 }

@@ -1,6 +1,6 @@
 {
   "name": "env-config-2",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simple Node.js package to handle environment variables and config in Node.js apps",
   "main": "index.js",
   "scripts": {

@@ -23,16 +23,18 @@ function dotEnvString (obj) {
 }
 
 test('generateConfig - returns default config if there are no overrides in dotEnv or env', () => {
-  expect(generateConfig({fooo: 'bar'})).toEqual({fooo: 'bar'})
+  const defaultConfig = {fooo: 'bar'}
+  expect(generateConfig({defaultConfig})).toEqual({fooo: 'bar'})
 })
 
 test('generateConfig - returns env variable first, then dot-env variable, and last default config', () => {
   const path = '.env'
   const envVars = {FOO: 1, IRRELEVANT: 1}
   const dotEnvVars = {FOO: 2, BAR: 2, IRRELEVANT: 2}
+  const defaultConfig = {FOO: 3, BAR: 3, BAZ: 3, NULL: null}
   fs.writeFileSync(path, dotEnvString(dotEnvVars))
   withEnvVars(envVars, () => {
-    expect(generateConfig({FOO: 3, BAR: 3, BAZ: 3, NULL: null})).toEqual({FOO: 1, BAR: 2, BAZ: 3, NULL: null})
+    expect(generateConfig({defaultConfig})).toEqual({FOO: 1, BAR: 2, BAZ: 3, NULL: null})
   })
   fs.unlinkSync(path)
 })
