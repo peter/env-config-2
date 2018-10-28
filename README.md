@@ -4,8 +4,9 @@ The goals of this package are:
 
 * To adhere to the Twelve Factor App principle of allowing config to be specified via environment variables so that we can have complete control over it for each environment that we may need (development, staging, production etc.)
 * To support setting config variables with environment variables so that we can avoid having sensitive information such as passwords in the source code
-* To be able to have convenient non-sensitive config defaults in the source code for the development environment to avoid the developer having to set a bunch of environment variables just to run the application in dev.
+* To be able to have convenient non-sensitive config defaults in the source code for the development environment to avoid the developer having to set a bunch of environment variables just to run the application in development
 * To support a .env file that is not under version control where developers can conveniently override config settings on a case-by-case basis in development
+* To offer some type casting support for environment variable values (which are always strings). Currently boolean, integer, and float are supported.
 
 ## Installation
 

@@ -1,5 +1,5 @@
 const fs = require('fs')
-const {generateConfig} = require('./index')
+const {getDotEnvConfig, generateConfig} = require('./index')
 
 function withEnvVars (envVars, fn) {
   const origValues = {}
@@ -18,6 +18,18 @@ function withEnvVars (envVars, fn) {
   return result
 }
 
+function withDotEnvFile (dotEnvVars, fn, options = {}) {
+  const path = options.dotEnvPath || '.env'
+  fs.writeFileSync(path, dotEnvString(dotEnvVars))
+  const result = fn()
+  fs.unlinkSync(path)
+  return result
+}
+
+function withEnv (options, fn) {
+  withEnvVars(options.envVars, () => withDotEnvFile(options.dotEnvVars, fn, options))
+}
+
 function dotEnvString (obj) {
   return Object.entries(obj).map(([key, value]) => `${key}=${value}`).join('\n')
 }
@@ -28,13 +40,71 @@ test('generateConfig - returns default config if there are no overrides in dotEn
 })
 
 test('generateConfig - returns env variable first, then dot-env variable, and last default config', () => {
-  const path = '.env'
   const envVars = {FOO: 1, IRRELEVANT: 1}
   const dotEnvVars = {FOO: 2, BAR: 2, IRRELEVANT: 2}
   const defaultConfig = {FOO: 3, BAR: 3, BAZ: 3, NULL: null}
-  fs.writeFileSync(path, dotEnvString(dotEnvVars))
-  withEnvVars(envVars, () => {
+  withEnv({envVars, dotEnvVars}, () => {
     expect(generateConfig({defaultConfig})).toEqual({FOO: 1, BAR: 2, BAZ: 3, NULL: null})
   })
-  fs.unlinkSync(path)
+})
+
+test('generateConfig - throws error if requiredKeys are not set', () => {
+  const envVars = {FOO: 1}
+  const dotEnvVars = {}
+  const defaultConfig = {}
+  const requiredKeys = ['BAR']
+  withEnv({envVars, dotEnvVars}, () => {
+    expect(() => generateConfig({defaultConfig, requiredKeys})).toThrowError(/\bBAR\b/)
+  })
+})
+
+test('generateConfig - does not throw error if requiredKeys are set', () => {
+  const requiredKeys = ['BAR']
+
+  withEnv({envVars: {FOO: 1, BAR: 1}, dotEnvVars: {}}, () => {
+    const defaultConfig = {}
+    expect(generateConfig({defaultConfig, requiredKeys})).toEqual({BAR: '1'})
+  })
+
+  withEnv({envVars: {FOO: 1, BAR: 1}, dotEnvVars: {}}, () => {
+    const defaultConfig = {BAR: 2}
+    expect(generateConfig({defaultConfig, requiredKeys})).toEqual({BAR: 1})
+  })
+
+  withEnv({envVars: {FOO: 1, BAR: 1}, dotEnvVars: {}}, () => {
+    const defaultConfig = {FOO: 2, BAR: 2}
+    expect(generateConfig({defaultConfig, requiredKeys})).toEqual({FOO: 1, BAR: 1})
+  })
+})
+
+test('generateConfig - you can specify types via options.exampleValues', () => {
+  const requiredKeys = ['BAR']
+
+  withEnv({envVars: {BAR: 1}, dotEnvVars: {}}, () => {
+    const exampleValues = {BAR: 9}
+    expect(generateConfig({exampleValues, requiredKeys})).toEqual({BAR: 1})
+  })
+})
+
+test('generateConfig - you can use options.getEnvironments to have dot-env file take precedence over env vars', () => {
+  function getEnvironments (options) {
+    return [getDotEnvConfig(options), process.env]
+  }
+
+  const dotEnvVars = {FOO: 1}
+  const envVars = {FOO: 2, BAR: 2}
+  const defaultConfig = {FOO: 3, BAR: 3, BAZ: 3}
+  withEnv({envVars, dotEnvVars}, () => {
+    expect(generateConfig({defaultConfig, getEnvironments})).toEqual({FOO: 1, BAR: 2, BAZ: 3})
+  })
+})
+
+test('generateConfig - you can use options.dotEnvPath for a custom file path', () => {
+  const envVars = {}
+  const dotEnvVars = {FOO: 1}
+  const defaultConfig = {FOO: 3}
+  const dotEnvPath = '.env.custom'
+  withEnv({envVars, dotEnvVars, dotEnvPath}, () => {
+    expect(generateConfig({defaultConfig, dotEnvPath})).toEqual({FOO: 1})
+  })
 })

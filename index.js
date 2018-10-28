@@ -23,12 +23,24 @@ function isMissing (key, value) {
   return value == null
 }
 
+function getEnvironments (options) {
+  return [process.env, getDotEnvConfig(options)]
+}
+
 function generateConfig (options = {}) {
-  const defaultOptions = {dotEnvPath, isMissing, typeCast, requiredKeys: [], defaultConfig: {}, exampleValues: {}}
+  const defaultOptions = {
+    dotEnvPath,
+    isMissing,
+    typeCast,
+    getEnvironments,
+    requiredKeys: [],
+    defaultConfig: {},
+    exampleValues: {}
+  }
   options = optionsWithDefaults(options, defaultOptions)
   const {defaultConfig} = options
   const missingKeys = []
-  const configCandidates = [process.env, getDotEnvConfig(options), defaultConfig]
+  const configCandidates = options.getEnvironments(options).concat([defaultConfig])
   const configKeys = options.requiredKeys.concat(Object.keys(defaultConfig))
   const config = configKeys.reduce((acc, key) => {
     const value = getValue(configCandidates, key)
@@ -43,6 +55,7 @@ function generateConfig (options = {}) {
 
 module.exports = {
   getDotEnvConfig,
+  getEnvironments,
   isMissing,
   generateConfig
 }
