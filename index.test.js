@@ -34,12 +34,12 @@ function dotEnvString (obj) {
   return Object.entries(obj).map(([key, value]) => `${key}=${value}`).join('\n')
 }
 
-test('generateConfig - returns default config if there are no overrides in dotEnv or env', () => {
+test('generateConfig - empty env - returns default config', () => {
   const defaultConfig = {fooo: 'bar'}
   expect(generateConfig({defaultConfig})).toEqual({fooo: 'bar'})
 })
 
-test('generateConfig - returns env variable first, then dot-env variable, and last default config', () => {
+test('generateConfig - precedence - returns env variable first, then dot-env variable, and last default config', () => {
   const envVars = {FOO: 1, IRRELEVANT: 1}
   const dotEnvVars = {FOO: 2, BAR: 2, IRRELEVANT: 2}
   const defaultConfig = {FOO: 3, BAR: 3, BAZ: 3, NULL: null}
@@ -48,7 +48,7 @@ test('generateConfig - returns env variable first, then dot-env variable, and la
   })
 })
 
-test('generateConfig - throws error if requiredKeys are not set', () => {
+test('generateConfig - requiredKeys - throws error if not set', () => {
   const envVars = {FOO: 1}
   const dotEnvVars = {}
   const defaultConfig = {}
@@ -58,7 +58,7 @@ test('generateConfig - throws error if requiredKeys are not set', () => {
   })
 })
 
-test('generateConfig - does not throw error if requiredKeys are set', () => {
+test('generateConfig - requiredKeys - does not throw error if set', () => {
   const requiredKeys = ['BAR']
 
   withEnv({envVars: {FOO: 1, BAR: 1}, dotEnvVars: {}}, () => {
@@ -77,7 +77,7 @@ test('generateConfig - does not throw error if requiredKeys are set', () => {
   })
 })
 
-test('generateConfig - you can specify types via options.exampleValues', () => {
+test('generateConfig - exampleValues - can specify types', () => {
   const requiredKeys = ['BAR']
 
   withEnv({envVars: {BAR: 1}, dotEnvVars: {}}, () => {
@@ -86,7 +86,7 @@ test('generateConfig - you can specify types via options.exampleValues', () => {
   })
 })
 
-test('generateConfig - you can use options.getEnvironments to have dot-env file take precedence over env vars', () => {
+test('generateConfig - getEnvironments - can make dot-env file take precedence over env vars', () => {
   function getEnvironments (options) {
     return [getDotEnvConfig(options), process.env]
   }
@@ -99,7 +99,20 @@ test('generateConfig - you can use options.getEnvironments to have dot-env file 
   })
 })
 
-test('generateConfig - you can use options.dotEnvPath for a custom file path', () => {
+test('generateConfig - getEnvironments - can disable env vars', () => {
+  function getEnvironments (options) {
+    return [getDotEnvConfig(options)]
+  }
+
+  const dotEnvVars = {FOO: 1}
+  const envVars = {FOO: 2, BAR: 2}
+  const defaultConfig = {FOO: 3, BAR: 3, BAZ: 3}
+  withEnv({envVars, dotEnvVars}, () => {
+    expect(generateConfig({defaultConfig, getEnvironments})).toEqual({FOO: 1, BAR: 3, BAZ: 3})
+  })
+})
+
+test('generateConfig - dotEnvPath - can set a custom file path', () => {
   const envVars = {}
   const dotEnvVars = {FOO: 1}
   const defaultConfig = {FOO: 3}
