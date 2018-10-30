@@ -1,7 +1,7 @@
 const assert = require('assert')
 const fs = require('fs')
 const dotenv = require('dotenv')
-const {typeCast} = require('./types')
+const {isObject, isArray, typeCast} = require('./types')
 
 const dotEnvPath = '.env'
 
@@ -20,33 +20,45 @@ function getValue (configCandidates, key) {
 }
 
 function isMissing (key, value) {
-  return value == null
+  if (value == null) {
+    return true
+  } else if (isArray(value) || typeof value === 'string') {
+    return value.length === 0
+  } else if (isObject(value)) {
+    return Object.keys(value).length === 0
+  } else {
+    return false
+  }
 }
 
 function getEnvironments (options) {
   return [process.env, getDotEnvConfig(options)]
 }
 
-function generateConfig (options = {}) {
+function generateEnvConfig (options = {}) {
   const defaultOptions = {
     dotEnvPath,
     isMissing,
     typeCast,
     getEnvironments,
     requiredKeys: [],
-    defaultConfig: {},
+    envDefaults: {},
     exampleValues: {}
   }
   options = optionsWithDefaults(options, defaultOptions)
-  const {defaultConfig} = options
+  const {envDefaults} = options
   const missingKeys = []
-  const configCandidates = options.getEnvironments(options).concat([defaultConfig])
-  const configKeys = options.requiredKeys.concat(Object.keys(defaultConfig))
+  const configCandidates = options.getEnvironments(options).concat([envDefaults])
+  const configKeys = options.requiredKeys.concat(Object.keys(envDefaults))
   const config = configKeys.reduce((acc, key) => {
     const value = getValue(configCandidates, key)
-    const exampleValue = options.exampleValues[key] || defaultConfig[key]
+    const exampleValue = options.exampleValues[key] || envDefaults[key]
     if (options.requiredKeys.includes(key) && options.isMissing(key, value)) missingKeys.push(key)
-    acc[key] = options.typeCast(value, exampleValue)
+    try {
+      acc[key] = options.typeCast(value, exampleValue)
+    } catch (castError) {
+      throw new Error(`Could not type cast key ${key} - ${castError.message}`)
+    }
     return acc
   }, {})
   assert(missingKeys.length === 0, `Config is missing the following keys that can be set as environment variables: ${missingKeys.join(', ')}`)
@@ -57,5 +69,5 @@ module.exports = {
   getDotEnvConfig,
   getEnvironments,
   isMissing,
-  generateConfig
+  generateEnvConfig
 }

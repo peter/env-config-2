@@ -10,8 +10,10 @@ test('typeCast - can cast booleans', () => {
 })
 
 test('typeCast - can cast integers', () => {
+  expect(typeCast('0', 2)).toEqual(0)
   expect(typeCast('1', 2)).toEqual(1)
   expect(typeCast('2', 2)).toEqual(2)
+  expect(typeCast('99', 2)).toEqual(99)
 })
 
 test('typeCast - can cast floats', () => {
@@ -26,7 +28,6 @@ test('typeCast - passes through null/undefined', () => {
   expect(typeCast(undefined, undefined)).toEqual(undefined)
 })
 
-test('typeCast - passes through unsupported types', () => {
-  expect(typeCast('foo', {})).toEqual('foo')
-  expect(typeCast('foo', new Date())).toEqual('foo')
+test('typeCast - raises error for unsupported types', () => {
+  expect(() => typeCast('foo', new Date())).toThrowError(/supported/)
 })
