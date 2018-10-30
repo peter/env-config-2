@@ -1,24 +1,24 @@
 const {typeCast} = require('./types')
 
 test('typeCast - can cast booleans', () => {
-  expect(typeCast('true', false)).toEqual(true)
-  expect(typeCast('false', false)).toEqual(false)
-  expect(typeCast('f', true)).toEqual(false)
-  expect(typeCast('0', true)).toEqual(false)
-  expect(typeCast('1', false)).toEqual(true)
-  expect(typeCast('FALSE', true)).toEqual(false)
+  expect(typeCast('true', 'boolean')).toEqual(true)
+  expect(typeCast('false', 'boolean')).toEqual(false)
+  expect(typeCast('f', 'boolean')).toEqual(false)
+  expect(typeCast('0', 'boolean')).toEqual(false)
+  expect(typeCast('1', 'boolean')).toEqual(true)
+  expect(typeCast('FALSE', 'boolean')).toEqual(false)
 })
 
 test('typeCast - can cast integers', () => {
-  expect(typeCast('0', 2)).toEqual(0)
-  expect(typeCast('1', 2)).toEqual(1)
-  expect(typeCast('2', 2)).toEqual(2)
-  expect(typeCast('99', 2)).toEqual(99)
+  expect(typeCast('0', 'integer')).toEqual(0)
+  expect(typeCast('1', 'integer')).toEqual(1)
+  expect(typeCast('2', 'integer')).toEqual(2)
+  expect(typeCast('99', 'integer')).toEqual(99)
 })
 
 test('typeCast - can cast floats', () => {
-  expect(typeCast('3.14', 1.5)).toEqual(3.14)
-  expect(typeCast('2', 1.5)).toEqual(2.0)
+  expect(typeCast('3.14', 'float')).toEqual(3.14)
+  expect(typeCast('2', 'float')).toEqual(2.0)
 })
 
 test('typeCast - passes through null/undefined', () => {
@@ -29,5 +29,5 @@ test('typeCast - passes through null/undefined', () => {
 })
 
 test('typeCast - raises error for unsupported types', () => {
-  expect(() => typeCast('foo', new Date())).toThrowError(/supported/)
+  expect(() => typeCast('foo', 'unsupported-type')).toThrowError(/supported/)
 })

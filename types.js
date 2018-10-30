@@ -1,3 +1,5 @@
+const {optionsWithDefaults} = require('./util')
+
 const TRUE_VALUES = ['t', 'true', 'True', 'TRUE', '1']
 const FALSE_VALUES = ['f', 'false', 'False', 'FALSE', '0']
 
@@ -19,7 +21,14 @@ function isObject (value) {
   return value != null && typeof value === 'object' && value.constructor === Object
 }
 
-const types = {
+function typeOf (value) {
+  for (let [typeName, type] of Object.entries(typeDefs)) {
+    if (type.isType(value)) return typeName
+  }
+  return undefined
+}
+
+const typeDefs = {
   boolean: {
     isType: v => [true, false].includes(v),
     cast (v) {
@@ -52,26 +61,21 @@ const types = {
   }
 }
 
-function typeCast (value, exampleValue) {
-  if (typeof value !== 'string' || exampleValue == null) return value
-  for (let [typeName, type] of Object.entries(types)) {
-    const defaultError = (v) => type.isValid(v) ? undefined : `must be valid ${typeName}`
-    if (type.isType(exampleValue)) {
-      const errorMessage = (type.error || defaultError)(value)
-      if (errorMessage) throw new Error(errorMessage)
-      return type.cast(value)
-    }
-  }
-  if (typeof exampleValue !== 'string') {
-    throw new Error(`value ${value} of type ${typeof value} with example value ${exampleValue} of type ${typeof exampleValue} - the example type is not supported`)
-  } else {
-    return value
-  }
+function typeCast (value, type, options = {}) {
+  options = optionsWithDefaults(options, {typeDefs: {}})
+  if (typeof value !== 'string' || type == null) return value
+  const typeDef = options.typeDefs[type] || typeDefs[type]
+  if (!typeDef) throw new Error(`type ${type} is not supported so cannot cast value ${value}`)
+  const defaultError = (v) => typeDef.isValid(v) ? undefined : `must be valid ${type}`
+  const errorMessage = (typeDef.error || defaultError)(value)
+  if (errorMessage) throw new Error(errorMessage)
+  return typeDef.cast(value)
 }
 
 module.exports = {
   isObject,
   isArray,
-  types,
+  typeDefs,
+  typeOf,
   typeCast
 }

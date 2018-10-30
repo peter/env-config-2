@@ -1,13 +1,10 @@
 const assert = require('assert')
 const fs = require('fs')
 const dotenv = require('dotenv')
-const {isObject, isArray, typeCast} = require('./types')
+const {optionsWithDefaults} = require('./util')
+const {isObject, isArray, typeOf, typeCast} = require('./types')
 
 const dotEnvPath = '.env'
-
-function optionsWithDefaults (options, defaultOptions) {
-  return Object.assign({}, defaultOptions, options)
-}
 
 function getDotEnvConfig (options = {}) {
   const path = options.dotEnvPath || dotEnvPath
@@ -43,19 +40,20 @@ function generateEnvConfig (options = {}) {
     getEnvironments,
     requiredKeys: [],
     envDefaults: {},
-    exampleValues: {}
+    types: {},
+    typeDefs: {}
   }
   options = optionsWithDefaults(options, defaultOptions)
   const {envDefaults} = options
   const missingKeys = []
   const configCandidates = options.getEnvironments(options).concat([envDefaults])
-  const configKeys = options.requiredKeys.concat(Object.keys(envDefaults))
+  const configKeys = options.requiredKeys.concat(Object.keys(envDefaults)).concat(Object.keys(options.types))
   const config = configKeys.reduce((acc, key) => {
     const value = getValue(configCandidates, key)
-    const exampleValue = options.exampleValues[key] || envDefaults[key]
+    const type = options.types[key] || typeOf(envDefaults[key])
     if (options.requiredKeys.includes(key) && options.isMissing(key, value)) missingKeys.push(key)
     try {
-      acc[key] = options.typeCast(value, exampleValue)
+      acc[key] = options.typeCast(value, type, options)
     } catch (castError) {
       throw new Error(`Could not type cast key ${key} - ${castError.message}`)
     }

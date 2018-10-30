@@ -9,11 +9,10 @@ This package exposes a single function `generateEnvConfig(options = {})` that re
 * Default variables provided in code in `options.envDefaults`
 
 The `generateEnvConfig` function will type cast values if the corresponding key is present in `options.envDefaults` or in
-`options.exampleValues` and if the value is a `boolean`, a `number`, an `array`, or an `object` (object literal). If the value
+`options.types` and if the value is a `boolean`, a `number`, an `array`, or an `object` (object literal). If the value
 is an `array` or an `object` then the environment value will be parsed as JSON. If type casting fails because the environment value is invalid then an error will be thrown.
 
-You can use `options.requiredKeys` to assert that certain keys must have a value, i.e. typically that they must be provided
-in the environment. If one of those keys is missing then `generateEnvConfig` will throw an error. You can customize the definition of missing via `options.isMissing` (the default definition is that null/undefined/empty means missing).
+You can use `options.requiredKeys` to assert that certain keys must have a value, i.e. typically that they must be provided in the environment. If one of those keys is missing then `generateEnvConfig` will throw an error. You can customize the definition of missing via `options.isMissing` (the default definition is that null/undefined/empty means missing).
 
 ## Rationale
 

@@ -81,12 +81,12 @@ test('generateEnvConfig - requiredKeys - does not throw error if set', () => {
   })
 })
 
-test('generateEnvConfig - exampleValues - can specify types', () => {
+test('generateEnvConfig - types - can specify for keys that are not in envDefaults', () => {
   const requiredKeys = ['BAR']
 
   withEnv({envVars: {BAR: '1'}, dotEnvVars: {}}, () => {
-    const exampleValues = {BAR: 9}
-    expect(generateEnvConfig({exampleValues, requiredKeys})).toEqual({BAR: 1})
+    const types = {BAR: 'integer'}
+    expect(generateEnvConfig({types, requiredKeys})).toEqual({BAR: 1})
   })
 })
 
@@ -123,5 +123,20 @@ test('generateEnvConfig - dotEnvPath - can set a custom file path', () => {
   const dotEnvPath = '.env.custom'
   withEnv({envVars, dotEnvVars, dotEnvPath}, () => {
     expect(generateEnvConfig({envDefaults, dotEnvPath})).toEqual({FOO: 1})
+  })
+})
+
+test('generateEnvConfig - typeDefs - can provide custom types', () => {
+  const envVars = {FOO: '2018-10-30T19:12:48.969Z'}
+  const dotEnvVars = {}
+  const types = {FOO: 'date'}
+  const typeDefs = {
+    date: {
+      cast: v => new Date(v),
+      isValid: v => true
+    }
+  }
+  withEnv({envVars, dotEnvVars}, () => {
+    expect(generateEnvConfig({types, typeDefs})).toEqual({FOO: new Date('2018-10-30T19:12:48.969Z')})
   })
 })
