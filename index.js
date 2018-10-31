@@ -2,7 +2,7 @@ const assert = require('assert')
 const fs = require('fs')
 const dotenv = require('dotenv')
 const {optionsWithDefaults} = require('./util')
-const {isObject, isArray, typeOf, typeCast} = require('./types')
+const {isObject, isArray, typeDefName, typeCast} = require('./types')
 
 const dotEnvPath = '.env'
 
@@ -38,20 +38,20 @@ function generateEnvConfig (options = {}) {
     isMissing,
     typeCast,
     getEnvironments,
-    requiredKeys: [],
-    envDefaults: {},
+    required: [],
+    defaults: {},
     types: {},
     typeDefs: {}
   }
   options = optionsWithDefaults(options, defaultOptions)
-  const {envDefaults} = options
+  const {defaults} = options
   const missingKeys = []
-  const configCandidates = options.getEnvironments(options).concat([envDefaults])
-  const configKeys = options.requiredKeys.concat(Object.keys(envDefaults)).concat(Object.keys(options.types))
+  const configCandidates = options.getEnvironments(options).concat([defaults])
+  const configKeys = options.required.concat(Object.keys(defaults)).concat(Object.keys(options.types))
   const config = configKeys.reduce((acc, key) => {
     const value = getValue(configCandidates, key)
-    const type = options.types[key] || typeOf(envDefaults[key])
-    if (options.requiredKeys.includes(key) && options.isMissing(key, value)) missingKeys.push(key)
+    const type = options.types[key] || typeDefName(defaults[key])
+    if (options.required.includes(key) && options.isMissing(key, value)) missingKeys.push(key)
     try {
       acc[key] = options.typeCast(value, type, options)
     } catch (castError) {

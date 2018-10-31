@@ -6,13 +6,13 @@ This package exposes a single function `generateEnvConfig(options = {})` that re
 
 * Environment variables
 * Variables in an optional `.env` file (parsed by the [dotenv package](https://www.npmjs.com/package/dotenv))
-* Default variables provided in code in `options.envDefaults`
+* Default variables provided in code in `options.defaults`
 
-The `generateEnvConfig` function will type cast values if the corresponding key is present in `options.envDefaults` or in
+The `generateEnvConfig` function will type cast values if the corresponding key is present in `options.defaults` or in
 `options.types` and if the value is a `boolean`, a `number`, an `array`, or an `object` (object literal). If the value
 is an `array` or an `object` then the environment value will be parsed as JSON. If type casting fails because the environment value is invalid then an error will be thrown.
 
-You can use `options.requiredKeys` to assert that certain keys must have a value, i.e. typically that they must be provided in the environment. If one of those keys is missing then `generateEnvConfig` will throw an error. You can customize the definition of missing via `options.isMissing` (the default definition is that null/undefined/empty means missing).
+You can use `options.required` to assert that certain keys must have a value, i.e. typically that they must be provided in the environment. If one of those keys is missing then `generateEnvConfig` will throw an error. You can customize the definition of missing via `options.isMissing` (the default definition is that null/undefined/empty means missing).
 
 ## Rationale
 
@@ -45,7 +45,7 @@ yarn add env-config-2
 const {generateEnvConfig} = require('env-config-2')
 
 const {NODE_ENV} = process.env
-const envDefaults ={
+const defaults ={
   NODE_ENV,
   PORT: (NODE_ENV === 'development' ? 3000 : null),
   MONGODB_URL: `mongodb://localhost:27017/node_env_config_example_${NODE_ENV}`,
@@ -54,8 +54,8 @@ const envDefaults ={
   RATE_LIMIT: (NODE_ENV === 'production' ? 5 : 0),
   API_BASE_URL: (NODE_ENV === 'development' ? 'http://localhost:3000/v1' : 'https://api.versioned.io/v1')
 }
-const requiredKeys = ['ALGOLIASEARCH_APPLICATION_ID', 'ALGOLIASEARCH_API_KEY', 'ALGOLIASEARCH_API_KEY_SEARCH']
-module.exports = generateEnvConfig({envDefaults, requiredKeys})
+const required = ['ALGOLIASEARCH_APPLICATION_ID', 'ALGOLIASEARCH_API_KEY', 'ALGOLIASEARCH_API_KEY_SEARCH']
+module.exports = generateEnvConfig({defaults, required})
 ```
 
 ```javascript

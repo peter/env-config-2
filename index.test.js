@@ -35,58 +35,62 @@ function dotEnvString (obj) {
 }
 
 test('generateEnvConfig - empty env - returns default config', () => {
-  const envDefaults = {fooo: 'bar'}
-  expect(generateEnvConfig({envDefaults})).toEqual({fooo: 'bar'})
+  const defaults = {fooo: 'bar'}
+  expect(generateEnvConfig({defaults})).toEqual({fooo: 'bar'})
 })
 
 test('generateEnvConfig - precedence - returns env variable first, then dot-env variable, and last default config', () => {
   const envVars = {FOO: '1', IRRELEVANT: '1'}
   const dotEnvVars = {FOO: '2', BAR: '2', IRRELEVANT: '2'}
-  const envDefaults = {FOO: 3, BAR: 3, BAZ: 3, NULL: null}
+  const defaults = {FOO: 3, BAR: 3, BAZ: 3, NULL: null}
   withEnv({envVars, dotEnvVars}, () => {
-    expect(generateEnvConfig({envDefaults})).toEqual({FOO: 1, BAR: 2, BAZ: 3, NULL: null})
+    expect(generateEnvConfig({defaults})).toEqual({FOO: 1, BAR: 2, BAZ: 3, NULL: null})
   })
 })
+test('generateEnvConfig - options validation - throws error if option with invalid type is passed', () => {
+  expect(() => generateEnvConfig({required: {}})).toThrowError(/expected option required to have type array/i)
+  expect(() => generateEnvConfig({types: []})).toThrowError(/expected option types to have type object/i)
+})
 
-test('generateEnvConfig - requiredKeys - throws error if not set or empty', () => {
+test('generateEnvConfig - required - throws error if not set or empty', () => {
   const envVars = {FOO: '1'}
   const dotEnvVars = {}
-  const envDefaults = {}
-  const requiredKeys = ['BAR']
+  const defaults = {}
+  const required = ['BAR']
   withEnv({envVars, dotEnvVars}, () => {
-    expect(() => generateEnvConfig({envDefaults, requiredKeys})).toThrowError(/\bBAR\b/)
+    expect(() => generateEnvConfig({defaults, required})).toThrowError(/\bBAR\b/)
   })
 
   withEnv({envVars: {BAR: ''}, dotEnvVars}, () => {
-    expect(() => generateEnvConfig({envDefaults, requiredKeys})).toThrowError(/\bBAR\b/)
+    expect(() => generateEnvConfig({defaults, required})).toThrowError(/\bBAR\b/)
   })
 })
 
-test('generateEnvConfig - requiredKeys - does not throw error if set', () => {
-  const requiredKeys = ['BAR']
+test('generateEnvConfig - required - does not throw error if set', () => {
+  const required = ['BAR']
 
   withEnv({envVars: {FOO: '1', BAR: '1'}, dotEnvVars: {}}, () => {
-    const envDefaults = {}
-    expect(generateEnvConfig({envDefaults, requiredKeys})).toEqual({BAR: '1'})
+    const defaults = {}
+    expect(generateEnvConfig({defaults, required})).toEqual({BAR: '1'})
   })
 
   withEnv({envVars: {FOO: '1', BAR: '1'}, dotEnvVars: {}}, () => {
-    const envDefaults = {BAR: 2}
-    expect(generateEnvConfig({envDefaults, requiredKeys})).toEqual({BAR: 1})
+    const defaults = {BAR: 2}
+    expect(generateEnvConfig({defaults, required})).toEqual({BAR: 1})
   })
 
   withEnv({envVars: {}, dotEnvVars: {}}, () => {
-    const envDefaults = {BAR: 2}
-    expect(generateEnvConfig({envDefaults, requiredKeys})).toEqual({BAR: 2})
+    const defaults = {BAR: 2}
+    expect(generateEnvConfig({defaults, required})).toEqual({BAR: 2})
   })
 })
 
-test('generateEnvConfig - types - can specify for keys that are not in envDefaults', () => {
-  const requiredKeys = ['BAR']
+test('generateEnvConfig - types - can specify for keys that are not in defaults', () => {
+  const required = ['BAR']
 
   withEnv({envVars: {BAR: '1'}, dotEnvVars: {}}, () => {
     const types = {BAR: 'integer'}
-    expect(generateEnvConfig({types, requiredKeys})).toEqual({BAR: 1})
+    expect(generateEnvConfig({types, required})).toEqual({BAR: 1})
   })
 })
 
@@ -97,9 +101,9 @@ test('generateEnvConfig - getEnvironments - can make dot-env file take precedenc
 
   const dotEnvVars = {FOO: '1'}
   const envVars = {FOO: '2', BAR: '2'}
-  const envDefaults = {FOO: 3, BAR: 3, BAZ: 3}
+  const defaults = {FOO: 3, BAR: 3, BAZ: 3}
   withEnv({envVars, dotEnvVars}, () => {
-    expect(generateEnvConfig({envDefaults, getEnvironments})).toEqual({FOO: 1, BAR: 2, BAZ: 3})
+    expect(generateEnvConfig({defaults, getEnvironments})).toEqual({FOO: 1, BAR: 2, BAZ: 3})
   })
 })
 
@@ -110,19 +114,19 @@ test('generateEnvConfig - getEnvironments - can disable env vars', () => {
 
   const dotEnvVars = {FOO: '1'}
   const envVars = {FOO: '2', BAR: '2'}
-  const envDefaults = {FOO: 3, BAR: 3, BAZ: 3}
+  const defaults = {FOO: 3, BAR: 3, BAZ: 3}
   withEnv({envVars, dotEnvVars}, () => {
-    expect(generateEnvConfig({envDefaults, getEnvironments})).toEqual({FOO: 1, BAR: 3, BAZ: 3})
+    expect(generateEnvConfig({defaults, getEnvironments})).toEqual({FOO: 1, BAR: 3, BAZ: 3})
   })
 })
 
 test('generateEnvConfig - dotEnvPath - can set a custom file path', () => {
   const envVars = {}
   const dotEnvVars = {FOO: '1'}
-  const envDefaults = {FOO: 3}
+  const defaults = {FOO: 3}
   const dotEnvPath = '.env.custom'
   withEnv({envVars, dotEnvVars, dotEnvPath}, () => {
-    expect(generateEnvConfig({envDefaults, dotEnvPath})).toEqual({FOO: 1})
+    expect(generateEnvConfig({defaults, dotEnvPath})).toEqual({FOO: 1})
   })
 })
 

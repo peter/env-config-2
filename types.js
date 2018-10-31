@@ -1,4 +1,4 @@
-const {optionsWithDefaults} = require('./util')
+const {isArray, isObject, optionsWithDefaults} = require('./util')
 
 const TRUE_VALUES = ['t', 'true', 'True', 'TRUE', '1']
 const FALSE_VALUES = ['f', 'false', 'False', 'FALSE', '0']
@@ -12,16 +12,7 @@ function isJsonString (str) {
   return true
 }
 
-function isArray (value) {
-  return Array.isArray(value)
-}
-
-// See: https://stackoverflow.com/questions/5876332/how-can-i-differentiate-between-an-object-literal-other-javascript-objects
-function isObject (value) {
-  return value != null && typeof value === 'object' && value.constructor === Object
-}
-
-function typeOf (value) {
+function typeDefName (value) {
   for (let [typeName, type] of Object.entries(typeDefs)) {
     if (type.isType(value)) return typeName
   }
@@ -76,6 +67,6 @@ module.exports = {
   isObject,
   isArray,
   typeDefs,
-  typeOf,
+  typeDefName,
   typeCast
 }
