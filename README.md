@@ -14,6 +14,15 @@ is an `array` or an `object` then the environment value will be parsed as JSON. 
 
 You can use `options.required` to assert that certain keys must have a value, i.e. typically that they must be provided in the environment. If one of those keys is missing then `generateEnvConfig` will throw an error. You can customize the definition of missing via `options.isMissing` (the default definition is that null/undefined/empty means missing).
 
+## Options
+
+The `generateEnvConfig` function takes these options:
+
+* `required` - An array of keys that are required, i.e. must be provided in the environment or in the defaults
+* `defaults` - An object with default values for environment variables
+* `types` - An object that specifies the type for each environment variable (boolean/integer/float/json)
+* `typeDefs` - An object with custom type definitions (i.e. you could use this option to parse environment variable strings into Date objects). See [typeDefs in types.js](types.js) for details
+
 ## Rationale
 
 The goals of this package are:
